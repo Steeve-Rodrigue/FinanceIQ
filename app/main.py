@@ -1,0 +1,23 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+import structlog
+from fastapi import FastAPI
+
+from app.config import settings
+from app.database import engine
+from app.routers import health
+
+logger = structlog.get_logger()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    logger.info("startup", environment=settings.environment)
+    yield
+    await engine.dispose()
+    logger.info("shutdown")
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app.include_router(health.router)
