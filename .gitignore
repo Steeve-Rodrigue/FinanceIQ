@@ -265,5 +265,6 @@ Thumbs.db
 *.pyc
 
 # Claude Code local settings (machine-specific, not shared)
-.claude/settings.local.json
+.claude/
 roadmap.md
+data/

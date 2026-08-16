@@ -40,3 +40,8 @@ precommit: ## Run all pre-commit hooks against the whole repo
 clean: ## Remove caches and bytecode
 	find . -type d -name '__pycache__' -exec rm -rf {} +
 	rm -rf .pytest_cache .ruff_cache
+
+
+# sudo -n ss -ltnp 2>&1
+#sudo systemctl restart docker
+#sudo systemctl stop postgresql@14-main.service
