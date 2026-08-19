@@ -20,10 +20,13 @@ check: lint ## Lint + format-check, no writes (what CI runs)
 	uv run ruff format --check .
 
 migrate: ## Apply migrations up to head
-	uv run alembic upgrade head
+	docker compose exec api alembic upgrade head
 
 revision: ## Autogenerate a new migration (usage: make revision m="add users table")
 	uv run alembic revision --autogenerate -m "$(m)"
+
+docker-build: ##
+	docker compose build
 
 docker-up: ## Start api + db + adminer
 	docker compose up -d
