@@ -5,10 +5,13 @@ description = "Add your description here"
 requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.19.1",
+    "bcrypt>=4.3.0",
     "claude-agent-sdk>=0.2.139",
+    "email-validator>=2.2.0",
     "fastapi>=0.141.1",
     "psycopg[binary,pool]>=3.3.4",
     "pydantic-settings>=2.15.0",
+    "pyjwt>=2.10.1",
     "python-dotenv>=1.2.2",
     "sqlalchemy[asyncio]>=2.0.52",
     "structlog>=26.1.0",

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.database import engine
-from app.routers import health
+from app.routers import auth, health, users
 
 logger = structlog.get_logger()
 
@@ -21,3 +21,5 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 app.include_router(health.router)
+app.include_router(auth.router)
+app.include_router(users.router)
