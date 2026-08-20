@@ -37,16 +37,14 @@ Python 3.11+, `uv` for deps, FastAPI, SQLAlchemy 2.0 (async) + Alembic, Postgres
 
 Full detail and Definition-of-Done for each phase lives in `roadmap.md` — this is just the map. Don't skip ahead: each phase's DoD must actually be true before the next one starts.
 
-0. **Scaffolding** — runnable skeleton: `uv`, Docker Compose (api+db+adminer), ruff, pre-commit, CI, `/health` with a real DB check.
-1. **Auth and data model** — `users`/`bills`/`categories`/`flags` schema, JWT auth, Postgres row-level security, automated cross-user isolation test.
-2. **Upload and happy-path parse** — one clean bill in, structured data out. No decision-making yet — this is the baseline.
-3. **Confidence scoring** — parser returns `{result, confidence, reasoning}`; labeled test set of 5-10 varied bills.
-4. **Decision loop: retry branch** — parser becomes a real subagent; orchestrator branches on confidence and retries with a genuinely different approach, capped at 2.
-5. **Elicitation: ask the user** — MCP server with elicitation; real pause/resume (no restart); `clarify.html` for pending questions. The branch that makes this agentic, not automated-with-a-fallback.
-6. **Categorizer and auditor** — same loop reused for two more agents; decision loop refactored into one shared function called by all three.
-7. **Dashboard and demo seeding** — recruiter-facing dashboard; seeded demo account with deliberately ambiguous bills so elicitation visibly triggers.
-8. **Deploy and package** — hosted demo, case study, README reordered outcome-first.
+0. **Scaffolding** ✅ Done — runnable skeleton: `uv`, Docker Compose (api+db+adminer), ruff, pre-commit, CI, `/health` with a real DB check.
+1. **Auth and data model** ✅ Done — all 7 entities from the ERD, JWT auth, Postgres row-level security (enforced via a dedicated non-superuser role, not just policies), automated cross-user isolation test at the database level.
+2. **Upload, agentic parser, confidence, and retry** — merges what were originally three separate phases (plain-function parser → add confidence → add retry): `notebooks/billsense_agent.ipynb` validated that an agentic parser with `{result, confidence, reasoning}` built in from the start is barely more work than a "plain" one, so build them together. Parser is an `app/services/` function calling `claude_agent_sdk.query()` directly (not a `.claude/agents/*.md` file — see `roadmap.md` Part 4). Retry = escalate to a stronger model (Haiku → Sonnet), capped at 2, not the same call repeated.
+3. **Elicitation: ask the user** — MCP server with elicitation; real pause/resume (no restart); `clarify.html` for pending questions. The branch that makes this agentic, not automated-with-a-fallback. The decision *logic* is already validated in the notebook above — this phase builds the real pause/resume transport, not the logic.
+4. **Categorizer and auditor** — same loop reused for two more agents; decision loop refactored into one shared function called by all three.
+5. **Dashboard and demo seeding** — recruiter-facing dashboard; seeded demo account with deliberately ambiguous bills so elicitation visibly triggers.
+6. **Deploy and package** — hosted demo, case study, README reordered outcome-first.
 
-Optional **Phase E — OpenRouter experiment**: time-boxed, only after phases 0-8 are done and working on Claude, on a separate branch.
+Optional **Phase E — OpenRouter experiment**: time-boxed, only after phases 0-6 are done and working on Claude, on a separate branch.
 
-**If time runs short: cut phase 7's chart or phase 8's polish before ever cutting phase 4 or 5.** Phases 0-3 produce a working but non-agentic app — it will feel like progress and tempt you to stop there. Phases 4 and 5 are the actual project.
+**If time runs short: cut phase 5's chart or phase 6's polish before ever cutting phase 3.** Phases 0-2 produce a working app that already does some deciding (confidence + retry) but still fails non-negotiable #4 the moment it gives up quietly instead of asking. Phase 3 (elicitation) is what closes that gap and is the one phase that can't be cut.
