@@ -18,7 +18,8 @@ jobs:
           --health-cmd "pg_isready -U financeiq"
           --health-interval 5s --health-timeout 5s --health-retries 5
     env:
-      DATABASE_URL: postgresql+psycopg://financeiq:financeiq@localhost:5432/financeiq
+      DATABASE_URL: postgresql+psycopg://financeiq_app:financeiq_app@localhost:5432/financeiq
+      MIGRATION_DATABASE_URL: postgresql+psycopg://financeiq:financeiq@localhost:5432/financeiq
       JWT_SECRET_KEY: test-secret-key-for-ci
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +29,15 @@ jobs:
       - run: uv sync --all-extras --dev
       - run: uv run ruff check .
       - run: uv run ruff format --check .
+      - name: "Create restricted app role (services: containers can't mount initdb scripts)"
+        run: |
+          PGPASSWORD=financeiq psql -h localhost -U financeiq -d financeiq -v ON_ERROR_STOP=1 <<-EOSQL
+              CREATE ROLE financeiq_app WITH LOGIN PASSWORD 'financeiq_app'
+                  NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+              GRANT CONNECT ON DATABASE financeiq TO financeiq_app;
+              GRANT USAGE ON SCHEMA public TO financeiq_app;
+              ALTER DEFAULT PRIVILEGES FOR ROLE financeiq IN SCHEMA public
+                  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO financeiq_app;
+          EOSQL
       - run: uv run alembic upgrade head
       - run: uv run pytest --cov=app

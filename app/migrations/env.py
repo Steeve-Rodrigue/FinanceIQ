@@ -22,8 +22,9 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
-# pull the connection URL from app settings rather than alembic.ini
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Migrations need DDL privileges (CREATE TABLE, CREATE POLICY, ...) that the app's own
+# restricted, RLS-subject role doesn't have — use the schema-owner role instead.
+config.set_main_option("sqlalchemy.url", settings.migration_database_url or settings.database_url)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

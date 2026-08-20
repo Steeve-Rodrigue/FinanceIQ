@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = False
     database_url: str
+    # DDL owner role, used only by Alembic — the app itself connects via `database_url` as a
+    # restricted, non-superuser role so Postgres row-level security actually applies to it.
+    migration_database_url: str | None = None
     log_level: str = "INFO"
 
     jwt_secret_key: str
