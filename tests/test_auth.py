@@ -1,15 +1,4 @@
-import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.main import app
-
-
-@pytest.fixture
-async def client(db_session: AsyncSession):
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        yield client
+from httpx import AsyncClient
 
 
 async def _signup(

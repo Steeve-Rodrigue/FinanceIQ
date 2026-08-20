@@ -1,6 +1,7 @@
 from collections.abc import AsyncGenerator
 
 import pytest
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.database import engine, get_db
@@ -36,3 +37,10 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
             app.dependency_overrides.pop(get_db, None)
             await session.close()
             await outer_transaction.rollback()
+
+
+@pytest.fixture
+async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
